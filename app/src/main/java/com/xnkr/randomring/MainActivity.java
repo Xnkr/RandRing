@@ -1,9 +1,13 @@
 package com.xnkr.randomring;
 
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.media.MediaMetadataRetriever;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -22,6 +26,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.TreeMap;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String INFO = "INFO";
     public static final String WARNING = "WARNING";
     public static final String SEVERE = "SEVERE";
+    public static final String ringtonesPath = Environment.getExternalStorageDirectory().toString() + "/Ringtones";
 
     Button nitrogen;
     TextView currentlyPlaying;
@@ -38,15 +44,16 @@ public class MainActivity extends AppCompatActivity {
     TreeMap<String, Ringtone> sMap = new TreeMap<>();
     TreeMap<String, Ringtone> dMap = new TreeMap<>();
     TreeMap<String, Ringtone> allMap = new TreeMap<>();
-    public static final String ringtonesPath = Environment.getExternalStorageDirectory().toString() + "/Ringtones";
-    int i = 0;
+    Ringtone currentlyPlayingRingtone;
     ArrayAdapter<String> dListAdapter;
     ArrayAdapter<String> sListAdapter;
+    Random random = new Random(0);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //TODO: DB and Persistance
         nitrogen = (Button) findViewById(R.id.nitrogen);
         currentlyPlaying = (TextView) findViewById(R.id.text);
         sourceList = (ListView) findViewById(R.id._source);
@@ -69,7 +76,13 @@ public class MainActivity extends AppCompatActivity {
         nitrogen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                currentlyPlaying.setText(Integer.toString(i++));
+                if (randomizeRingtone()) {
+                    Toast.makeText(MainActivity.this, "Ringtone set", Toast.LENGTH_SHORT).show();
+                    currentlyPlaying.setText("Currently set: " + currentlyPlayingRingtone.getFileName());
+                } else {
+                    Toast.makeText(MainActivity.this, "Something went wrong", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
 
@@ -140,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
         sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                // TODO: Switch scheduler
                 if (isChecked) {
                     Toast.makeText(MainActivity.this, "Checked", Toast.LENGTH_SHORT).show();
                 } else {
@@ -192,9 +206,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.reset) {
             try {
-                i = 0;
-                currentlyPlaying.setText(Integer.toString(i++));
-
                 Log.i(INFO, "Resetting selections");
                 dMap.clear();
                 dList.clear();
@@ -206,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 sListAdapter.notifyDataSetChanged();
                 dListAdapter.notifyDataSetChanged();
+                Toast.makeText(this, "Lists reset", Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
                 Log.e(SEVERE, e.getMessage());
                 e.printStackTrace();
@@ -258,5 +270,49 @@ public class MainActivity extends AppCompatActivity {
             return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    private boolean randomizeRingtone() {
+        try {
+            Object[] dMapKeys = dMap.keySet().toArray();
+            Object dMapRandom = dMapKeys[random.nextInt(dMapKeys.length)];
+            if (currentlyPlayingRingtone != null) {
+                while (dMapRandom == currentlyPlayingRingtone.getFileName())
+                    dMapRandom = dMapKeys[random.nextInt(dMapKeys.length)];
+            }
+            currentlyPlayingRingtone = dMap.get(dMapRandom);
+            setRingtone();
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    private void setRingtone() {
+        File ringtoneFile = new File(currentlyPlayingRingtone.getFilePath());
+        if (currentlyPlayingRingtone.getFileName() != null) {
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.MediaColumns.DATA, ringtoneFile.getAbsolutePath());
+            values.put(MediaStore.MediaColumns.TITLE, ringtoneFile.getName());
+            values.put(MediaStore.MediaColumns.MIME_TYPE, "audio/mp3");
+            values.put(MediaStore.MediaColumns.SIZE, ringtoneFile.length());
+            values.put(MediaStore.Audio.Media.ARTIST, R.string.app_name);
+            values.put(MediaStore.Audio.Media.IS_RINGTONE, true);
+            values.put(MediaStore.Audio.Media.IS_NOTIFICATION, false);
+            values.put(MediaStore.Audio.Media.IS_ALARM, false);
+            values.put(MediaStore.Audio.Media.IS_MUSIC, false);
+
+            Uri uri = MediaStore.Audio.Media.getContentUriForPath(ringtoneFile.getAbsolutePath());
+            // TODO: Add permissions check
+            getContentResolver().delete(uri, MediaStore.MediaColumns.DATA + "=\"" + ringtoneFile.getAbsolutePath() + "\"", null);
+            Uri newUri = getContentResolver().insert(uri, values);
+
+            try {
+                RingtoneManager.setActualDefaultRingtoneUri(MainActivity.this, RingtoneManager.TYPE_RINGTONE, newUri);
+            } catch (Exception e) {
+                Log.e(SEVERE, e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 }
