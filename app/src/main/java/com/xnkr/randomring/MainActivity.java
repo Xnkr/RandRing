@@ -7,6 +7,7 @@ import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -17,7 +18,6 @@ import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.view.Menu;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String WARNING = "WARNING";
     public static final String SEVERE = "SEVERE";
 
-    Button nitrogen, resetButton, reloadButton;
+    Button nitrogen;
     TextView currentlyPlaying;
     ListView sourceList, destList;
     List<String> sList = new ArrayList<>();
@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     TreeMap<String, Ringtone> allMap = new TreeMap<>();
     public static final String ringtonesPath = Environment.getExternalStorageDirectory().toString() + "/Ringtones";
     int i = 0;
+    ArrayAdapter<String> dListAdapter;
+    ArrayAdapter<String> sListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,22 +49,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         nitrogen = (Button) findViewById(R.id.nitrogen);
         currentlyPlaying = (TextView) findViewById(R.id.text);
-        resetButton = (Button) findViewById(R.id.resetButton);
-        reloadButton = (Button) findViewById(R.id.reloadButton);
         sourceList = (ListView) findViewById(R.id._source);
         destList = (ListView) findViewById(R.id._dest);
 
-        final ArrayAdapter<String> sListAdapter = new ArrayAdapter<>(
+        sListAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_list_item_1,
                 sList
         );
-        final ArrayAdapter<String> dListAdapter = new ArrayAdapter<>(
+        dListAdapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_list_item_1,
                 dList
         );
-
 
         sourceList.setAdapter(sListAdapter);
         destList.setAdapter(dListAdapter);
@@ -71,68 +70,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 currentlyPlaying.setText(Integer.toString(i++));
-            }
-        });
-        resetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    i = 0;
-                    currentlyPlaying.setText(Integer.toString(i++));
-
-                    Log.i(INFO, "Resetting selections");
-                    dMap.clear();
-                    dList.clear();
-                    sMap.clear();
-                    sList.clear();
-                    sMap = (TreeMap<String, Ringtone>) allMap.clone();
-                    for (String sKey : sMap.keySet()) {
-                        sList.add(sKey);
-                    }
-                    sListAdapter.notifyDataSetChanged();
-                    dListAdapter.notifyDataSetChanged();
-                } catch (Exception e) {
-                    Log.e(SEVERE, e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-        });
-        reloadButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
-                builder1.setMessage("Are you sure you want to reload? This will reset all selections!");
-                builder1.setCancelable(true);
-
-                builder1.setPositiveButton(
-                        "Yes",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                currentlyPlaying.setText("Hello World");
-                                try {
-                                    Toast.makeText(MainActivity.this, "Searching for *.mp3 in /Ringtones directory", Toast.LENGTH_LONG).show();
-                                    if (reloadRingtones()) {
-                                        sListAdapter.notifyDataSetChanged();
-                                    } else {
-                                        Toast.makeText(MainActivity.this, "Something went wrong. Search failed!", Toast.LENGTH_LONG).show();
-                                    }
-                                } catch (Exception e) {
-                                    Log.e(SEVERE, e.getMessage());
-                                    e.printStackTrace();
-                                }
-                                dialog.cancel();
-                            }
-                        });
-
-                builder1.setNegativeButton(
-                        "No",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-                AlertDialog alert11 = builder1.create();
-                alert11.show();
             }
         });
 
@@ -149,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     Object o = sourceList.getItemAtPosition(position);
                     String chosenRingtone = (String) o;
-                    currentlyPlaying.setText("Currently Playing: " + chosenRingtone);
                     dMap.put(
                             chosenRingtone,
                             sMap.get(chosenRingtone)
@@ -185,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
 
                     sListAdapter.notifyDataSetChanged();
                     dListAdapter.notifyDataSetChanged();
-                    Toast.makeText(MainActivity.this, "Ringtone unchosen" + unChosenRingtone, Toast.LENGTH_LONG).show();
 
                 } catch (Exception e) {
                     Log.e(SEVERE, e.getMessage());
@@ -197,18 +132,17 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu,menu);
-        getMenuInflater().inflate(R.menu.switch_menu,menu);
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        getMenuInflater().inflate(R.menu.switch_menu, menu);
         MenuItem item = menu.findItem(R.id.switch_rand);
         item.setActionView(R.layout.switch_item);
         final Switch sw = (Switch) menu.findItem(R.id.switch_rand).getActionView().findViewById(R.id.action_switch);
         sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
+                if (isChecked) {
                     Toast.makeText(MainActivity.this, "Checked", Toast.LENGTH_SHORT).show();
-                }
-                else{
+                } else {
                     Toast.makeText(MainActivity.this, "Unchecked", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -256,11 +190,62 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId()== R.id.reset){
-            Toast.makeText(this, "Reset", Toast.LENGTH_SHORT).show();
-        } else if(item.getItemId() == R.id.reload){
-            Toast.makeText(this, "Reload", Toast.LENGTH_SHORT).show();
-        } else{
+        if (item.getItemId() == R.id.reset) {
+            try {
+                i = 0;
+                currentlyPlaying.setText(Integer.toString(i++));
+
+                Log.i(INFO, "Resetting selections");
+                dMap.clear();
+                dList.clear();
+                sMap.clear();
+                sList.clear();
+                sMap = (TreeMap<String, Ringtone>) allMap.clone();
+                for (String sKey : sMap.keySet()) {
+                    sList.add(sKey);
+                }
+                sListAdapter.notifyDataSetChanged();
+                dListAdapter.notifyDataSetChanged();
+            } catch (Exception e) {
+                Log.e(SEVERE, e.getMessage());
+                e.printStackTrace();
+            }
+        } else if (item.getItemId() == R.id.reload) {
+
+            AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
+            builder1.setMessage("Are you sure you want to reload? This will reset all selections!");
+            builder1.setCancelable(true);
+
+            builder1.setPositiveButton(
+                    "Yes",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            currentlyPlaying.setText("Hello World");
+                            try {
+                                Toast.makeText(MainActivity.this, "Searching for *.mp3 in /Ringtones directory", Toast.LENGTH_LONG).show();
+                                if (reloadRingtones()) {
+                                    sListAdapter.notifyDataSetChanged();
+                                } else {
+                                    Toast.makeText(MainActivity.this, "Something went wrong. Search failed!", Toast.LENGTH_LONG).show();
+                                }
+                            } catch (Exception e) {
+                                Log.e(SEVERE, e.getMessage());
+                                e.printStackTrace();
+                            }
+                            dialog.cancel();
+                        }
+                    });
+
+            builder1.setNegativeButton(
+                    "No",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alert11 = builder1.create();
+            alert11.show();
+        } else {
             return super.onOptionsItemSelected(item);
         }
         return true;

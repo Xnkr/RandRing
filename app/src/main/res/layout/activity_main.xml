@@ -9,10 +9,10 @@
     <Button
         android:id="@+id/nitrogen"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="58dp"
         android:layout_margin="20dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="16dp"
         android:text="@string/nitrogen"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -39,24 +39,15 @@
         app:layout_constraintTop_toBottomOf="@+id/nitrogen"
         app:layout_constraintVertical_bias="0.007" />
 
-    <Button
-        android:id="@+id/resetButton"
-        android:layout_width="144dp"
+    <TextView
+        android:id="@+id/available_ringtones"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="@string/reset"
+        android:text="@string/available_ringtones"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text" />
-
-    <Button
-        android:id="@+id/reloadButton"
-        android:layout_width="145dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/reload_list"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text" />
 
     <ListView
@@ -65,10 +56,22 @@
         android:layout_height="200dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/resetButton" />
+        app:layout_constraintTop_toBottomOf="@+id/available_ringtones" />
+
+
+    <TextView
+        android:id="@+id/selected_ringtones"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:textStyle="bold"
+        android:text="@string/selected_ringtones"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/_source" />
 
     <ListView
         android:id="@+id/_dest"
@@ -76,9 +79,10 @@
         android:layout_height="200dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/_source" />
+        app:layout_constraintTop_toBottomOf="@+id/selected_ringtones" />
+
 
 </android.support.constraint.ConstraintLayout>
