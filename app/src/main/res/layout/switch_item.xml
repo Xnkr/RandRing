@@ -1,11 +1,16 @@
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <Switch
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true" />
-</RelativeLayout>
+        android:layout_width="70dp"
+        android:layout_height="50dp"
+        android:scaleX="1.3"
+        android:scaleY="1.3"
+        android:switchMinWidth="40dp"
+        android:padding="6dp"
+        android:id="@+id/action_switch"
+        />
+
+</LinearLayout>

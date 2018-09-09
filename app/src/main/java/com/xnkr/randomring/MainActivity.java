@@ -12,7 +12,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.view.Menu;
@@ -196,6 +198,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu,menu);
+        getMenuInflater().inflate(R.menu.switch_menu,menu);
+        MenuItem item = menu.findItem(R.id.switch_rand);
+        item.setActionView(R.layout.switch_item);
+        final Switch sw = (Switch) menu.findItem(R.id.switch_rand).getActionView().findViewById(R.id.action_switch);
+        sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    Toast.makeText(MainActivity.this, "Checked", Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    Toast.makeText(MainActivity.this, "Unchecked", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
         return true;
     }
 
