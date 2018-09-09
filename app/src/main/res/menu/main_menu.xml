@@ -3,6 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/select_all"
+        android:title="@string/select_all"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/reset"
         android:title="@string/reset"
         app:showAsAction="never" />

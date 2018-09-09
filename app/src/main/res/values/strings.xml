@@ -5,4 +5,5 @@
     <string name="reload_list">Reload List</string>
     <string name="available_ringtones">Available Ringtones:</string>
     <string name="selected_ringtones">Selected Ringtones:</string>
+    <string name="select_all">Select all</string>
 </resources>

@@ -245,6 +245,15 @@ public class MainActivity extends AppCompatActivity {
                     });
             AlertDialog alert11 = builder1.create();
             alert11.show();
+        } else if (item.getItemId() == R.id.select_all) {
+            if (!sMap.isEmpty()) {
+                sMap.clear();
+                dMap = (TreeMap<String, Ringtone>) allMap.clone();
+                dList.addAll(sList);
+                sList.clear();
+                sListAdapter.notifyDataSetChanged();
+                dListAdapter.notifyDataSetChanged();
+            }
         } else {
             return super.onOptionsItemSelected(item);
         }
